@@ -45,6 +45,7 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+//clicking a list item's text, invoke function
 $(".list-group").on("click","p", function() {
   //grab current elements text we clicked on
   var text = $(this).text().trim();
@@ -74,6 +75,35 @@ $(".list-group").on("click","p", function() {
     $(this).replaceWith(taskP);
   })
 });
+
+//due date clicked
+$('.list-group').on("click","span", function() {
+  //get current text
+  var date = $(this).text().trim();
+  //create new input element
+  var dateInput = $("<input>").attr("type", "text").addClass("form-control").val(date);
+  //swap existing date element for input
+  $(this).replaceWith(dateInput);
+  //auto focus on new element
+  dateInput.trigger("focus");
+});
+
+//value of due date changed
+$(".list-group").on("blur", "input[type='text']", function() {
+  //get current text
+  var date = $(this).val().trim();
+  //get parent elements id attribute from list-"id" and set = status
+  var status = $(this).closest(".list-group").attr("id").replace("list-", "");
+  //get tasks position in the list of other task items
+  var index = $(this).closest(".list-group-item").index();
+  //update task in array and re-save to local storage
+  tasks[status][index].date = date;
+  saveTasks();
+  //recreate span element with class from bootstrap
+  var taskSpan = $("<span>").addClass("badge badge-primary badge-pill").text(date);
+  //replace input element with new span element
+  $(this).replaceWith(taskSpan);
+})
 
 
 
