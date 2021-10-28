@@ -3,16 +3,14 @@ var tasks = {};
 var createTask = function(taskText, taskDate, taskList) {
   // create elements that make up a task item
   var taskLi = $("<li>").addClass("list-group-item");
-  var taskSpan = $("<span>")
-    .addClass("badge badge-primary badge-pill")
-    .text(taskDate);
-  var taskP = $("<p>")
-    .addClass("m-1")
-    .text(taskText);
+  var taskSpan = $("<span>").addClass("badge badge-primary badge-pill").text(taskDate);
+  var taskP = $("<p>").addClass("m-1").text(taskText);
 
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+  //check due date
+  auditTask(taskLi);
 
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
@@ -164,10 +162,11 @@ $(".list-group").on("change", "input[type='text']", function() {
   saveTasks();
 
   // recreate span and insert in place of input element
-  var taskSpan = $("<span>")
-    .addClass("badge badge-primary badge-pill")
-    .text(date);
+  var taskSpan = $("<span>").addClass("badge badge-primary badge-pill").text(date);
     $(this).replaceWith(taskSpan);
+
+    //pass tasks li element into auditTask() to check new due date and run auditTask function
+    auditTask($(taskSpan).closest(".list-group-item"));
 });
 
 // remove all tasks
@@ -246,6 +245,31 @@ $("#trash").droppable({
 $("#modalDueDate").datepicker({
   minDate: 1
 });
+
+//add color indicators for task dates
+var auditTask = function(taskEl) {
+  //get date from task li element
+  var date = $(taskEl).find("span").text().trim();
+  console.log(date);
+
+  //convert and set time var to the current date with moment object at 5pm
+  var time = moment(date, "L").set("hour", 17);
+
+  //remove old classes from element
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+
+  //apply new class if task is near or over due date
+  if (moment().isAfter(time)) {
+    //assign class to taskEl for overdue tasks with css class
+    $(taskEl).addClass("list-group-item-danger");
+  } 
+  //if the absolute value of the current time in days is less than or equal to 2
+  else if (Math.abs(moment().diff(time, "days")) <= 2) {
+    //assign warning class to taskEl
+    $(taskEl).addClass("list-group-item-warning");
+  }
+
+};
 
 
 // load tasks for the first time
